@@ -13,39 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- name: Restart adjutant services
-  command: "/bin/true"
-  notify:
-    - Stop services
-    - Start services
 
 - name: Stop services
   service:
-    name: "{{ item.value.service_name }}"
-    enabled: "{{ (item.value.service_enabled | bool) | ternary('yes', 'no') }}"
+    name: "{{ item.service_name }}"
+    enabled: yes
     state: "stopped"
     daemon_reload: "{{ (ansible_service_mgr == 'systemd') | ternary('yes', omit) }}"
-  with_dict: "{{ adjutant_services }}"
-  when: inventory_hostname in groups[item.value.group]
+  with_items: "{{ filtered_adjutant_services }}"
   register: _stop
-  until: _stop | success
+  until: _stop is success
   retries: 5
   delay: 2
+  listen: "Restart adjutant services"
 
 - name: Start services
   service:
-    name: "{{ item.value.service_name }}"
+    name: "{{ item.service_name }}"
     enabled: yes
     state: "started"
     daemon_reload: "{{ (ansible_service_mgr == 'systemd') | ternary('yes', omit) }}"
-  with_dict: "{{ adjutant_services }}"
-  when:
-    - inventory_hostname in groups[item.value.group]
-    - item.value.service_enabled | bool
+  with_items: "{{ filtered_adjutant_services }}"
   register: _start
-  until: _start | success
+  until: _start is success
   retries: 5
   delay: 2
+  listen: "Restart adjutant services"
 
 - name: Restart Apache
   service:
@@ -55,6 +48,7 @@
     daemon_reload: "{{ (ansible_service_mgr == 'systemd') | ternary('yes', omit) }}"
   when: adjutant_use_mod_wsgi | bool
   register: _restart
-  until: _restart | success
+  until: _restart is success
   retries: 5
   delay: 2
+  listen: "Restart adjutant services"

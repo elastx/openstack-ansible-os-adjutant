@@ -16,7 +16,7 @@
     ErrorLog  /var/log/adjutant/adjutant-apache-error.log
     CustomLog /var/log/adjutant/adjutant-access.log combined
 
-{% if adjutant_ssl | bool and adjutant_service_internaluri_proto == "https" -%}
+{% if adjutant_enable_ssl | bool and adjutant_service_internaluri_proto == "https" -%}
     SSLEngine on
     SSLCertificateFile    {{ adjutant_ssl_cert }}
     SSLCertificateKeyFile {{ adjutant_ssl_key }}

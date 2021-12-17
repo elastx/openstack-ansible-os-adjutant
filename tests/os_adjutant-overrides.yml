@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-adjutant_venv_tag: "testing"
 adjutant_developer_mode: true
-adjutant_galera_address: "{{ hostvars[groups['galera_all'][0]]['ansible_host'] }}"
+adjutant_galera_address: "{{ test_galera_host }}"
 adjutant_container_mysql_password: "SuperSecrete"
 adjutant_service_password: "secrete"
 adjutant_secret_key: "secretkey"

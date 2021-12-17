@@ -23,6 +23,9 @@ adjutant_devel_distro_packages:
   - apache2-dev
   - libmysqlclient-dev
   - libssl-dev
+  - build-essential
+  - git-core
+  - libsystemd-dev
 
 adjutant_distro_packages:
   - apache2
@@ -30,6 +33,9 @@ adjutant_distro_packages:
   - git
   - python-keystoneclient
   - libapache2-mod-wsgi
+  - virtualenv
+  - python-systemd
+  - python3-systemd
 
 adjutant_system_service_name: apache2
 adjutant_apache_config:

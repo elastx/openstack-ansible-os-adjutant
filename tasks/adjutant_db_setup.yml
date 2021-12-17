@@ -22,7 +22,7 @@
     login_host: "{{ adjutant_galera_address }}"
     name: "{{ adjutant_galera_database }}"
     state: "present"
-  delegate_to: "{{ groups['galera_all'][0] }}"
+  delegate_to: "{{ adjutant_db_setup_host }}"
   no_log: true
 
 - name: Grant access to the DB for the service
@@ -35,7 +35,7 @@
     host: "{{ item }}"
     state: "present"
     priv: "{{ adjutant_galera_database }}.*:ALL"
-  delegate_to: "{{ groups['galera_all'][0] }}"
+  delegate_to: "{{ adjutant_db_setup_host }}"
   no_log: true
   with_items:
     - "localhost"

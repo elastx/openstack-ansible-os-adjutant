@@ -16,12 +16,16 @@
 ## Verbosity Options
 debug: False
 
+# Set the host which will execute the shade modules
+# for the service setup. The host must already have
+# clouds.yaml properly configured.
+adjutant_service_setup_host: "{{ openstack_service_setup_host | default('localhost') }}"
+adjutant_service_setup_host_python_interpreter: "{{ openstack_service_setup_host_python_interpreter | default((adjutant_service_setup_host == 'localhost') | ternary(ansible_playbook_python, ansible_python['executable'])) }}"
+
 # Set the package install state for distribution and pip packages
 # Options are 'present' and 'latest'
 adjutant_package_state: "latest"
 adjutant_pip_package_state: "latest"
-
-adjutant_service_user_name: adjutant
 
 adjutant_system_group_name: adjutant
 adjutant_system_user_name: adjutant
@@ -43,18 +47,28 @@ adjutant_git_install_branch: stable/rocky
 adjutant_developer_constraints:
   - "git+{{ adjutant_git_repo }}@{{ adjutant_git_install_branch }}#egg=adjutant"
 
-adjutant_user_domain_name: Default
-adjutant_user_domain_id: default
 adjutant_keystone_auth_plugin: password
 
+adjutant_db_setup_host: "{{ ('galera_all' in groups) | ternary(groups['galera_all'][0], 'localhost') }}"
 adjutant_galera_address: "{{ galera_address | default('127.0.0.1') }}"
 adjutant_galera_database: adjutant
 adjutant_galera_user: adjutant
+adjutant_galera_use_ssl: "{{ galera_use_ssl | default(False) }}"
+adjutant_galera_ssl_ca_cert: "{{ galera_ssl_ca_cert | default('/etc/ssl/certs/galera-ca.pem') }}"
 
 ## Service Type and Data
-adjutant_service_region: RegionOne
 adjutant_service_name: adjutant
 adjutant_service_type: registration
+adjutant_service_description: "Adjutant Registration Service"
+barbican_default_role_names:
+  - project_admin
+  - project_mod
+barbican_service_role_name: admin
+adjutant_service_project_name: service
+adjutant_service_project_domain_id: Default
+adjutant_service_region: RegionOne
+adjutant_service_user_name: adjutant
+adjutant_service_user_domain_id: default
 adjutant_service_port: 5050
 adjutant_service_proto: http
 adjutant_service_publicuri_proto: "{{ openstack_service_publicuri_proto | default(adjutant_service_proto) }}"
@@ -79,14 +93,12 @@ adjutant_wsgi_threads: 1
 adjutant_wsgi_processes_max: 16
 adjutant_wsgi_processes: "{{ [[ansible_processor_vcpus|default(1), 1] | max * 2, adjutant_wsgi_processes_max] | min }}"
 
-# set adjutant_ssl to true to enable SSL configuration on the adjutant containers
-adjutant_ssl: false
+# Adjutant SSL
 adjutant_ssl_cert: /etc/ssl/certs/adjutant.pem
 adjutant_ssl_key: /etc/ssl/private/adjutant.key
 adjutant_ssl_ca_cert: /etc/ssl/certs/adjutant-ca.pem
 adjutant_ssl_protocol: "{{ ssl_protocol | default('ALL -SSLv2 -SSLv3') }}"
 adjutant_ssl_cipher_suite: "{{ ssl_cipher_suite | default('ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS') }}"
-
 # if using a self-signed certificate, set this to true to regenerate it
 adjutant_ssl_self_signed_regen: false
 adjutant_ssl_self_signed_subject: "/C=US/ST=Texas/L=San Antonio/O=IT/CN={{ internal_lb_vip_address }}/subjectAltName=IP.1={{ external_lb_vip_address }}"
@@ -95,6 +107,9 @@ adjutant_ssl_self_signed_subject: "/C=US/ST=Texas/L=San Antonio/O=IT/CN={{ inter
 #adjutant_user_ssl_cert: <path to cert on ansible deployment host>
 #adjutant_user_ssl_key: <path to cert on ansible deployment host>
 #adjutant_user_ssl_ca_cert: <path to cert on ansible deployment host>
+
+# Toggle whether adjutant should be served via SSL
+adjutant_enable_ssl: "{{ (haproxy_ssl | default(True)) | bool }}"
 
 adjutant_email_backend: django.core.mail.backends.smtp.EmailBackend
 adjutant_email_host: localhost
@@ -254,10 +269,12 @@ adjutant_api_init_overrides: {}
 ## Service Name-Group Mapping
 adjutant_services:
   adjutant-api:
-    group: adjutant_api
+    group: adjutant_all
     service_name: adjutant-api
     service_enabled: "{{ adjutant_use_mod_wsgi | ternary(false, true) }}"
     init_config_overrides: "{{ adjutant_api_init_overrides }}"
+    execstarts: "{{ adjutant_bin }}/adjutant-api"
+    start_order: 1
 
 adjutant_pip3_install_args: "{{ pip_install_options | default('') }}"
 adjutant_venv_python_executable: python3

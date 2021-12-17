@@ -83,7 +83,7 @@
     - ansible_pkg_mgr == 'apt'
   with_items:
     - name: ssl
-      state: "{{ adjutant_ssl | bool | ternary('present', 'absent') }}"
+      state: "{{ adjutant_enable_ssl | bool | ternary('present', 'absent') }}"
     - name: rewrite
       state: present
   notify:

@@ -22,38 +22,11 @@
     - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
     - "{{ ansible_os_family | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
     - "{{ ansible_distribution | lower }}.yml"
-    - "{{ ansible_os_family | lower }}-{{ ansible_distribution_version.split('.')[0] }}.yml"
     - "{{ ansible_os_family | lower }}.yml"
   tags:
     - always
 
-- name: Check init system
-  command: cat /proc/1/comm
-  changed_when: false
-  register: _pid1_name
-  tags:
-    - always
-
-- name: Set the name of pid1
-  set_fact:
-    pid1_name: "{{ _pid1_name.stdout }}"
-  tags:
-    - always
-
-- include: adjutant_pre_install.yml
-  tags:
-    - adjutant-install
-
-- name: Install distro packages
-  package:
-    pkg: virtualenv
-    state: present
-    update_cache: "{{ (ansible_pkg_mgr == 'apt') | ternary('yes', omit) }}"
-    cache_valid_time: "{{ (ansible_pkg_mgr == 'apt') | ternary(cache_timeout, omit) }}"
-  register: install_packages
-  until: install_packages|success
-  retries: 5
-  delay: 2
+- include_tasks: adjutant_pre_install.yml
   tags:
     - adjutant-install
 
@@ -76,27 +49,50 @@
   tags:
     - adjutant-install
 
-- include: adjutant_post_install.yml
+- include_tasks: adjutant_post_install.yml
   static: no
   tags:
     - adjutant-config
 
-- include: adjutant_domain_setup.yml
+- name: Run the systemd service role
+  include_role:
+    name: systemd_service
+    private: true
+  vars:
+    systemd_user_name: "{{ adjutant_system_user_name }}"
+    systemd_group_name: "{{ adjutant_system_group_name }}"
+    systemd_tempd_prefix: openstack
+    systemd_slice_name: adjutant
+    systemd_lock_path: /var/lock/adjutant
+    systemd_CPUAccounting: true
+    systemd_BlockIOAccounting: true
+    systemd_MemoryAccounting: true
+    systemd_TasksAccounting: true
+    systemd_services:
+      - service_name: "{{ service_var.service_name }}"
+        enabled: yes
+        state: started
+        execstarts: "{{ service_var.execstarts }}"
+        execreloads: "{{ service_var.execreloads | default([]) }}"
+        config_overrides: "{{ service_var.init_config_overrides }}"
+  with_items: "{{ filtered_adjutant_services }}"
+  loop_control:
+    loop_var: service_var
+  tags:
+    - adjutant-config
+    - systemd-service
+
+- include_tasks: adjutant_db_setup.yml
   when: inventory_hostname == groups['adjutant_all'][0]
   tags:
     - adjutant-config
 
-- include: adjutant_db_setup.yml
+- include_tasks: adjutant_service_setup.yml
   when: inventory_hostname == groups['adjutant_all'][0]
   tags:
     - adjutant-config
 
-- include: "adjutant_init_{{ ansible_service_mgr }}.yml"
-  static: no
-  tags:
-    - adjutant-setup
-
-- include: adjutant_apache.yml
+- include_tasks: adjutant_apache.yml
   static: no
   when:
     - adjutant_use_mod_wsgi | bool
