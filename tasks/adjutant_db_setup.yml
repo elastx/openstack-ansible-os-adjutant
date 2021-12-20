@@ -42,7 +42,7 @@
     - "%"
 
 - name: Perform adjutant migrate
-  command: "{{ adjutant_bin }}/adjutant-api migrate"
+  command: "{{ adjutant_bin }}/adjutant-api migrate --no-input"
   become: yes
   become_user: "{{ adjutant_system_user_name }}"
   changed_when: false

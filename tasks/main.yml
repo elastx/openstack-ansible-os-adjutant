@@ -32,7 +32,7 @@
 
 - name: Install the python venv
   import_role:
-    name: "ansible-role-python_venv_build"
+    name: "python_venv_build"
   vars:
     venv_python_executable: "{{ adjutant_venv_python_executable }}"
     venv_build_distro_package_list: "{{ adjutant_devel_distro_packages }}"

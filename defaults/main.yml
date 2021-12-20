@@ -60,10 +60,10 @@ adjutant_galera_ssl_ca_cert: "{{ galera_ssl_ca_cert | default('/etc/ssl/certs/ga
 adjutant_service_name: adjutant
 adjutant_service_type: registration
 adjutant_service_description: "Adjutant Registration Service"
-barbican_default_role_names:
+adjutant_default_role_names:
   - project_admin
   - project_mod
-barbican_service_role_name: admin
+adjutant_service_role_name: admin
 adjutant_service_project_name: service
 adjutant_service_project_domain_id: Default
 adjutant_service_region: RegionOne
@@ -282,8 +282,10 @@ adjutant_venv_rebuild: no
 
 adjutant_pip3_packages:
   - python-adjutant==0.5.0
-  - cryptography
+  - cryptography==3.2.1
   - mod_wsgi
+  - confspirator==0.1.6
+  - pyparsing==3.0.0a1
 
 # This variable is used by the repo_build process to determine
 # which host group to check for members of before building the
