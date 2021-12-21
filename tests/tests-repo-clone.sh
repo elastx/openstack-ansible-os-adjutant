@@ -96,7 +96,7 @@ elif [[ ! -d tests/common ]]; then
     # Otherwise we're clearly not in zuul or using a previously setup
     # repo in some way, so just clone it from upstream.
     else
-        git clone -b stable/rocky \
+        git clone -b stable/train \
             https://opendev.org/openstack/openstack-ansible-tests \
             ${WORKING_DIR}/tests/common
     fi

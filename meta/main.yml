@@ -1,5 +1,5 @@
 ---
-# Copyright 2014, Rackspace US, Inc.
+# Copyright 2017, Rackspace US, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,21 +14,32 @@
 # limitations under the License.
 
 galaxy_info:
-  author: holmsten
-  description: Installation and setup of Adjutant
-  company: ELASTX
-  license: Apache2
+  author: OpenStack-Ansible
+  description: Deploy Adjutant with OpenStack-Ansible
+  company: OpenStack
+  license: Apache-2.0
   min_ansible_version: 2.2
   platforms:
+    - name: Debian
+      versions:
+        - stretch
     - name: Ubuntu
       versions:
         - xenial
-  categories:
+        - bionic
+    - name: EL
+      versions:
+        - 7
+    - name: opensuse
+      versions:
+        - 15
+  galaxy_tags:
     - cloud
+    - openstack
     - python
     - adjutant
-    - development
-    - openstack
+
 dependencies:
-  - apt_package_pinning
-  - openstack_openrc
+  - role: apt_package_pinning
+    when:
+      - ansible_pkg_mgr == 'apt'

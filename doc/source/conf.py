@@ -23,7 +23,6 @@
 # serve to show the default.
 
 import pbr.version
-import os
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -41,7 +40,7 @@ import os
 extensions = [
     'openstackdocstheme',
     'sphinx.ext.autodoc',
-    'sphinxmark'
+    'sphinxcontrib.rsvgconverter',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -66,11 +65,11 @@ description = 'OpenStack-Ansible deploys OpenStack environments using Ansible.'
 project = 'OpenStack-Ansible'
 role_name = 'os_adjutant'
 target_name = 'openstack-ansible-' + role_name
-title = 'OpenStack-Ansible Documentation: ' + role_name + 'role'
+title = 'OpenStack-Ansible Documentation: ' + role_name + ' role'
 
 # The link to the browsable source code (for the left hand menu)
 oslosphinx_cgit_link = (
-    "https://git.openstack.org/cgit/openstack/{}".format(target_name)
+    "https://opendev.org/openstack/{}".format(target_name)
 )
 
 # The version info for the project you're documenting, acts as replacement for
@@ -252,9 +251,11 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, target_name + '.tex',
-     title, author, 'manual'),
+    (master_doc, 'doc-' + target_name + '.tex',
+     title.replace("_", "\_"), author, 'manual'),
 ]
+
+latex_use_xindy = False
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -312,17 +313,11 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 # texinfo_no_detailmenu = False
+# -- Options for PDF output --------------------------------------------------
 
+pdf_documents = [
+    (master_doc, target_name,
+     title, author)
+]
 
-watermark = os.popen("git branch --contains $(git rev-parse HEAD)\
-| awk -F/ '/stable/ {print $2}'").read().strip(' \n\t').capitalize()
-if watermark == "":
-    watermark = "Pre-release"
-
-# -- Options for sphinxmark -----------------------------------------------
-sphinxmark_enable = True
-sphinxmark_div = 'docs-body'
-sphinxmark_image = 'text'
-sphinxmark_text = watermark
-sphinxmark_text_color = (128, 128, 128)
-sphinxmark_text_size = 70
+locale_dirs = ['locale/']

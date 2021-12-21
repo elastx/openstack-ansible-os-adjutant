@@ -18,3 +18,17 @@ adjutant_galera_address: "{{ test_galera_host }}"
 adjutant_container_mysql_password: "SuperSecrete"
 adjutant_service_password: "secrete"
 adjutant_secret_key: "secretkey"
+
+tempest_run: yes
+
+tempest_plugins:
+  - name: adjutant-tempest-plugin
+    repo: https://git.openstack.org/openstack/adjutant-tempest-plugin
+    branch: master
+
+tempest_test_whitelist:
+  - adjutant_tempest_plugin.tests.api
+
+tempest_roles:
+  - key-manager:service-admin
+

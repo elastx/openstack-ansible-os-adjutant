@@ -1,16 +1,14 @@
 OpenStack-Ansible Adjutant
-############################
-:tags: openstack, adjutant, cloud, ansible
-:category: \*nix
+##########################
 
-contributor guidelines
+Contributor Guidelines
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Filing Bugs
 -----------
 
-Bugs should be filed on Launchpad, not GitHub: "https://bugs.launchpad.net
-/openstack-ansible"
+Bugs should be filed on Launchpad, not GitHub:
+"https://bugs.launchpad.net/openstack-ansible"
 
 
 When submitting a bug, or working on a bug, please ensure the following
@@ -29,16 +27,36 @@ Submitting Code
 
 Changes to the project should be submitted for review via the Gerrit tool,
 following the workflow documented at:
-"http://docs.openstack.org/infra/manual/developers.html#development-workflow"
+"https://docs.openstack.org/infra/manual/developers.html#development-workflow"
 
 Pull requests submitted through GitHub will be ignored and closed without
 regard.
+
+If you wish to test your changes locally prior to submitting them for review
+you can use the ``Vagrantfile`` included in the root of this repository. It
+aims to replicate the gate check testing that will be done by OpenStack CI
+once your review has been submitted.
+
+To run tests:
+
+.. code-block:: shell-session
+
+        # vagrant up
+
+The Vagrant box will run all tests and report status in the output. If you
+need to iterate through a fix/test cycle, tests can be re-run in a running
+Vagrant box with:
+
+.. code-block:: shell-session
+
+        # vagrant provision
 
 
 Extra
 -----
 
-Tags: If it's a bug that needs fixing in a branch in addition to Master, add a
+Tags:
+    If it's a bug that needs fixing in a branch in addition to Master, add a
     '\<release\>-backport-potential' tag (eg ``juno-backport-potential``).
     There are predefined tags that will autocomplete.
 
@@ -54,7 +72,7 @@ Importance:
 Style guide
 -----------
 
-When creating tasks and other roles for use in Ansible please create then
+When creating tasks and other roles for use in Ansible please create them
 using the YAML dictionary format.
 
 Example YAML dictionary format:
@@ -93,7 +111,7 @@ criteria are met:
     * Include historical information on how the problem was identified.
     * Any relevant logs are included.
     * If the issue is a bug that needs fixing in a branch other than Master,
-      add the ‘backport potential’ tag TO THE ISSUE (not the PR).
+      add the 'backport potential' tag TO THE ISSUE (not the PR).
     * The provided information should be totally self-contained. External
       access to web services/sites should not be needed.
     * If the issue is needed for a hotfix release, add the 'expedite' label.

@@ -42,7 +42,7 @@ adjutant_venv_download: "{{ not adjutant_developer_mode | bool }}"
 adjutant_venv_download_url: http://127.0.0.1/venvs/untagged/ubuntu/adjutant.tgz
 
 adjutant_git_repo: https://opendev.org/openstack/adjutant
-adjutant_git_install_branch: stable/rocky
+adjutant_git_install_branch: stable/train
 
 adjutant_developer_constraints:
   - "git+{{ adjutant_git_repo }}@{{ adjutant_git_install_branch }}#egg=adjutant"
