@@ -22,11 +22,26 @@
     - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
     - "{{ ansible_os_family | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
     - "{{ ansible_distribution | lower }}.yml"
+    - "{{ ansible_os_family | lower }}-{{ ansible_distribution_version.split('.')[0] }}.yml"
     - "{{ ansible_os_family | lower }}.yml"
   tags:
     - always
 
-- include_tasks: adjutant_pre_install.yml
+- import_tasks: db_setup.yml
+  when:
+    - inventory_hostname == groups['adjutant_all'][0]
+  vars:
+    _oslodb_setup_host: "{{ adjutant_db_setup_host }}"
+    _oslodb_databases:
+      - name: "{{ adjutant_galera_database }}"
+        users:
+          - username: "{{ adjutant_galera_user }}"
+            password: "{{ adjutant_galera_password }}"
+  tags:
+    - common-db
+    - adjutant-config
+
+- import_tasks: adjutant_pre_install.yml
   tags:
     - adjutant-install
 
@@ -35,27 +50,63 @@
     name: "python_venv_build"
   vars:
     venv_python_executable: "{{ adjutant_venv_python_executable }}"
+    venv_build_constraints: "{{ adjutant_git_constraints }}"
     venv_build_distro_package_list: "{{ adjutant_devel_distro_packages }}"
     venv_install_destination_path: "{{ adjutant_bin | dirname }}"
     venv_install_distro_package_list: "{{ adjutant_distro_packages }}"
-    venv_pip_install_args: "{{ adjutant_pip3_install_args }}"
-    venv_pip_packages: "{{ adjutant_pip3_packages }}"
+    venv_pip_install_args: "{{ adjutant_pip_install_args }}"
+    venv_pip_packages: "{{ adjutant_pip_packages }}"
     venv_facts_when_changed:
       - section: "adjutant"
         option: "venv_tag"
         value: "{{ adjutant_venv_tag }}"
-    venv_rebuild: "{{ adjutant_venv_rebuild | default('no') }}"
-    venv_wheel_build_enable: false
   tags:
     - adjutant-install
 
-- include_tasks: adjutant_post_install.yml
+- import_tasks: adjutant_post_install.yml
   static: no
   tags:
     - adjutant-config
 
+- import_tasks: adjutant_db_sync.yml
+  when: inventory_hostname == groups['adjutant_all'][0]
+  tags:
+    - adjutant-config
+
+- import_tasks: service_setup.yml
+  vars:
+    _service_adminuri_insecure: "{{ keystone_service_adminuri_insecure }}"
+    _service_in_ldap: "{{ adjutant_service_in_ldap }}"
+    _service_setup_host: "{{ adjutant_service_setup_host }}"
+    _service_setup_host_python_interpreter: "{{ adjutant_service_setup_host_python_interpreter }}"
+    _service_project_name: "{{ adjutant_service_project_name }}"
+    _service_region: "{{ adjutant_service_region }}"
+    _service_users:
+      - name: "{{ adjutant_service_user_name }}"
+        password: "{{ adjutant_service_password }}"
+        role: "{{ adjutant_role_name }}"
+      - role: "project_mod"
+      - role: "project_admin"
+    _service_catalog:
+      - name: "{{ adjutant_service_name }}"
+        type: "{{ adjutant_service_type }}"
+        description: "{{ adjutant_service_description }}"
+    _service_endpoints:
+      - interface: "public"
+        url: "{{ adjutant_service_publicurl }}"
+        service: "{{ adjutant_service_name }}"
+      - interface: "internal"
+        url: "{{ adjutant_service_internalurl }}"
+        service: "{{ adjutant_service_name }}"
+      - interface: "admin"
+        url: "{{ adjutant_service_adminurl }}"
+        service: "{{ adjutant_service_name }}"
+  when: inventory_hostname == groups['adjutant_all'][0]
+  tags:
+    - adjutant-config
+
 - name: Run the systemd service role
-  include_role:
+  import_role:
     name: systemd_service
     private: true
   vars:
@@ -82,22 +133,16 @@
     - adjutant-config
     - systemd-service
 
-- include_tasks: adjutant_db_setup.yml
-  when: inventory_hostname == groups['adjutant_all'][0]
+- name: Import uwsgi role
+  import_role:
+    name: uwsgi
+  vars:
+    uwsgi_services: "{{ uwsgi_adjutant_services }}"
+    uwsgi_install_method: "source"
   tags:
+    - adjutant-install
     - adjutant-config
-
-- include_tasks: adjutant_service_setup.yml
-  when: inventory_hostname == groups['adjutant_all'][0]
-  tags:
-    - adjutant-config
-
-- include_tasks: adjutant_apache.yml
-  static: no
-  when:
-    - adjutant_use_mod_wsgi | bool
-  tags:
-    - adjutant-setup
+    - uwsgi
 
 - name: Flush handlers
   meta: flush_handlers

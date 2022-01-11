@@ -17,3 +17,4 @@ bridges:
   - "br-mgmt"
 
 ansible_python_interpreter: "/usr/bin/python2"
+container_name: adjutant1

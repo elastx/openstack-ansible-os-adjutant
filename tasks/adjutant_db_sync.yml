@@ -1,5 +1,7 @@
 ---
-# Copyright 2015, Rackspace US, Inc.
+# Copyright 2016, Rackspace US, Inc.
+#
+# (C) 2016 Michael Rice <michael.rice@rackspace.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-adjutant_venv_tag: "testing"
-adjutant_developer_mode: true
-adjutant_galera_address: "{{ hostvars[groups['galera_all'][0]]['ansible_host'] }}"
-adjutant_galera_password: "SuperSecretePassword"
-adjutant_service_password: "secrete"
-adjutant_secret_key: "secretkey"
+- name: Perform adjutant migrate
+  command: "{{ adjutant_bin }}/adjutant-api migrate"
+  become: yes
+  become_user: "{{ adjutant_system_user_name }}"
+  changed_when: false
