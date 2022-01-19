@@ -25,7 +25,9 @@
   until: _stop is success
   retries: 5
   delay: 2
-  listen: "Restart adjutant services"
+  listen:
+    - "Restart adjutant services"
+    - "venv changed"
 
 - name: Start services
   service:
@@ -38,7 +40,9 @@
   until: _start is success
   retries: 5
   delay: 2
-  listen: "Restart adjutant services"
+  listen:
+    - "Restart adjutant services"
+    - "venv changed"
 
 - name: Restart Apache
   service:
@@ -51,4 +55,6 @@
   until: _restart is success
   retries: 5
   delay: 2
-  listen: "Restart adjutant services"
+  listen:
+    - "Restart adjutant services"
+    - "venv changed"
