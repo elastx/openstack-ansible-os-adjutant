@@ -1,4 +1,8 @@
 # {{ ansible_managed }}
 
+{% if ansible_distribution_major_version == '16' %}
 LoadModule wsgi_module "/openstack/venvs/adjutant-{{ adjutant_venv_tag }}/lib/python3.5/site-packages/mod_wsgi/server/mod_wsgi-py35.cpython-35m-x86_64-linux-gnu.so"
+{% else %}
+LoadModule wsgi_module "/openstack/venvs/adjutant-{{ adjutant_venv_tag }}/lib/python3.6/site-packages/mod_wsgi/server/mod_wsgi-py36.cpython-36m-x86_64-linux-gnu.so"
+{% endif %}
 WSGIPythonHome "/openstack/venvs/adjutant-{{ adjutant_venv_tag }}"
