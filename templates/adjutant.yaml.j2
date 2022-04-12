@@ -12,7 +12,7 @@ django:
       NAME: '{{ adjutant_galera_database }}'
       PASSWORD: '{{ adjutant_container_mysql_password }}'
       USER: '{{ adjutant_galera_user }}'
-  log_file: adjutant.log
+  log_file: /var/log/adjutant/adjutant.log
   email:
     email_backend: {{ adjutant_email_backend }}
     host: {{ adjutant_email_host }}
