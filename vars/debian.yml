@@ -22,6 +22,7 @@ adjutant_devel_distro_packages:
   - python3-dev
   - git-core
   - libsystemd-dev
+  - libmysqlclient-dev
 
 adjutant_distro_packages:
-  - mysqlclient
+  - libmysqlclient-dev

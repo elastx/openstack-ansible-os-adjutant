@@ -39,12 +39,12 @@ adjutant_git_install_branch: master
 adjutant_upper_constraints_url: "{{ requirements_git_url | default('https://git.openstack.org/cgit/openstack/requirements/plain/upper-constraints.txt?h=' ~ requirements_git_install_branch | default('master')) }}"
 adjutant_git_constraints:
   - "git+{{ adjutant_git_repo }}@{{ adjutant_git_install_branch }}#egg=adjutant"
-  - "--constraint {{ adjutant_upper_constraints_url }}"
+#  - "--constraint {{ adjutant_upper_constraints_url }}"
 
 adjutant_keystone_auth_plugin: password
 adjutant_user_domain_id: default
 
-adjutant_db_setup_host: "{{ ('galera_all' in groups) | ternary(groups['galera_all'][0], 'localhost') }}"
+adjutant_galera_setup_host: "{{ ('galera_all' in groups) | ternary(groups['galera_all'][0], 'localhost') }}"
 adjutant_galera_address: "{{ galera_address | default('127.0.0.1') }}"
 adjutant_galera_database: adjutant
 adjutant_galera_user: adjutant
@@ -80,6 +80,7 @@ adjutant_horizon_publicurl: "{{ openstack_service_publicuri_proto | default(adju
 adjutant_wsgi_threads: 1
 adjutant_wsgi_processes_max: 16
 adjutant_wsgi_processes: "{{ [[(ansible_processor_vcpus//ansible_processor_threads_per_core)|default(1), 1] | max * 2, adjutant_wsgi_processes_max] | min }}"
+adjutant_use_uwsgi: true
 
 adjutant_email_backend: django.core.mail.backends.smtp.EmailBackend
 adjutant_email_host: localhost

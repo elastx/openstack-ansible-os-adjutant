@@ -31,12 +31,12 @@
   when:
     - inventory_hostname == groups['adjutant_all'][0]
   vars:
-    _oslodb_setup_host: "{{ adjutant_db_setup_host }}"
+    _oslodb_setup_host: "{{ adjutant_galera_setup_host }}"
     _oslodb_databases:
       - name: "{{ adjutant_galera_database }}"
         users:
           - username: "{{ adjutant_galera_user }}"
-            password: "{{ adjutant_galera_password }}"
+            password: "{{ adjutant_container_mysql_password }}"
   tags:
     - common-db
     - adjutant-config
@@ -106,9 +106,9 @@
     - adjutant-config
 
 - name: Run the systemd service role
-  import_role:
+  include_role:
     name: systemd_service
-    private: true
+    #private: true
   vars:
     systemd_user_name: "{{ adjutant_system_user_name }}"
     systemd_group_name: "{{ adjutant_system_group_name }}"
